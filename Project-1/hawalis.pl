@@ -1,16 +1,21 @@
 %:- use_module(library(lists)).
 
+%----------------------------------
 %Inicial board
+%----------------------------------
 initialBoard([
-  [9,7,5,3,1,2,2],
+  [4,7,5,3,1,2,2],
   [8,2,2,2,2,2,2],
   [4,2,2,7,2,2,2],
   [2,2,2,2,2,2,2]
 ]).
+%----------------------------------
 %Inicial board end
+%----------------------------------
 
-
+%----------------------------------
 %Unicode translation
+%----------------------------------
 print_cell(0):- put_code(48).
 print_cell(1):- put_code(49). 
 print_cell(2):- put_code(50).
@@ -21,10 +26,13 @@ print_cell(6):- put_code(54).
 print_cell(7):- put_code(55). 
 print_cell(8):- put_code(56).
 print_cell(9):- put_code(57).
+%----------------------------------
 %Unicode translation end
+%----------------------------------
 
-
+%----------------------------------
 %Board display
+%----------------------------------
 drawAll([H | T], Index):-
     drawBoard([H | T], Index).
 
@@ -49,10 +57,14 @@ drawLine([H | T]) :-
     print_cell(H), 
     write(' |'), 
     drawLine(T).
+%----------------------------------
 %Board display end
+%----------------------------------
 
 
+%----------------------------------
 %Matrix functions
+%----------------------------------
 
 getMatrixSeedAt(0, Column, [HeaderLines|_], Seed):-
 	getLineSeedAt(Column, HeaderLines, Seed).
@@ -93,10 +105,13 @@ max_list([H|T], Max0, Max) :-
     Max1 is max(H, Max0),
     max_list(T, Max1, Max).
 
+%----------------------------------
 %Matrix functions
+%----------------------------------
 
+%----------------------------------
 %Game logic
-
+%----------------------------------
 incrementOne(Line, Column, Board, NewBoard):-
     getMatrixSeedAt(Line, Column, Board, Seed),
     NewSeed is Seed + 1,
@@ -127,7 +142,6 @@ checkMostSeedsPlayer2(Board, MostSeeds):-
     MostSeeds is max(MostSeeds1, MostSeeds2).
 
 
-
 updateCoordsTop(Line, Column, NewLine, NewColumn):-
     (Line =:= 0; Line =:= 2),
     Column =:= 0,
@@ -156,22 +170,42 @@ updateCoords(Line,Column, NewLine, NewColumn):-
 
 updateCoords(Line,Column, NewLine, NewColumn):-
     (Line =:= 1; Line =:= 3),
-    updateCoordsBot(Line,Column, NewLine, NewColumn).    
+    updateCoordsBot(Line,Column, NewLine, NewColumn).
 
 
+%make a move 
+move(_, _, 0, Board , Board).
+move(Line, Column, Seeds, Board, NewBoard):-
+    Seeds > 0,
+    updateCoords(Line,Column,NewLine,NewColumn),
+    incrementOne(NewLine,NewColumn,Board, BoardInc),
+
+    NewSeeds is Seeds - 1,
+    move(NewLine, NewColumn, NewSeeds, BoardInc, NewBoard).
+        
+%----------------------------------
 %Game logic end
+%----------------------------------
 
-
+%----------------------------------
 %Game
+%----------------------------------
 init:-
     initialBoard(Tab),
-
     cycle(Tab).
 
 cycle(Board):-
     drawTopBorder,
     drawAll(Board, 0),
-    checkMostSeedsPlayer2(Board, X),
-    write(X), nl,
+    
+    nl,nl,nl,nl,nl,nl,
+    takeAllSeedsAt(0,0,Board, Board1, Seeds),
+    move(0,0,Seeds,Board1, NewBoard),
+
+    drawTopBorder,
+    drawAll(NewBoard, 0),
     nl.
+
+%----------------------------------
 %Game end
+%----------------------------------
