@@ -57,6 +57,20 @@ drawLine([H | T]) :-
     print_cell(H), 
     write(' |'), 
     drawLine(T).
+
+drawTitle:-
+    write('  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. '), nl,
+    write(' | .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |'), nl,
+    write(' | |  ____  ____  | || |      __      | || | _____  _____ | || |      __      | || |   _____      | || |     _____    | || |    _______   | |'), nl,
+    write(' | | |_   ||   _| | || |     /  \\     | || ||_   _||_   _|| || |     /  \\     | || |  |_   _|     | || |    |_   _|   | || |   /  ___  |  | |'), nl,
+    write(' | |   | |__| |   | || |    / /\\ \\    | || |  | | /\\ | |  | || |    / /\\ \\    | || |    | |       | || |      | |     | || |  |  (__ \\_|  | |'), nl,
+    write(' | |   |  __  |   | || |   / ____ \\   | || |  | |/  \\| |  | || |   / ____ \\   | || |    | |   _   | || |      | |     | || |   \'.___`-.   | |'), nl,
+    write(' | |  _| |  | |_  | || | _/ /    \\ \\_ | || |  |   /\\   |  | || | _/ /    \\ \\_ | || |   _| |__/ |  | || |     _| |_    | || |  |`\\____) |  | |'), nl,
+    write(' | | |____||____| | || ||____|  |____|| || |  |__/  \\__|  | || ||____|  |____|| || |  |________|  | || |    |_____|   | || |  |_______.\'  | |'), nl,
+    write(' | |              | || |              | || |              | || |              | || |              | || |              | || |              | |'), nl,
+    write(' | \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' |'), nl,
+    write('  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\' '), nl.
+
 %---------------------------------------------------------------------------------
 %Board display end
 %---------------------------------------------------------------------------------
@@ -317,40 +331,44 @@ checkWinPlayer2(_).
 
 
 /**
-* make a move
+* MovePlayerX first reads the line and column the player want to play, then checks 
+* if the play is possible and only then calls the moveLoop function to do a move
 */
-movePlayer1(Board, NewBoard):-
+move(Board, 1, NewBoard):-
     nl, write('Player 1 turn:'), nl,nl,
     readPlay(Line, Column),
-    (Line =:= 0; Line =:= 1),
+    (Line = 0; Line = 1),
     checkPossibleMove(Line, Column, Board, Boolean),
     Boolean =:= 1,
     takeAllSeedsAt(Line,Column,Board, Board1, Seeds),
     moveLoop(Line, Column, Seeds, Board1 , NewBoard, 0).
 
-movePlayer1(Board, NewBoard):-
+move(Board, 1, NewBoard):-
     clearSreen,
     write('Can\'t play in those coordinates'), nl,
     drawTopBorder,
     drawAll(Board, 0),
-    movePlayer1(Board, NewBoard).
+    move(Board, 1, NewBoard).
 
-movePlayer2(Board, NewBoard):-
+move(Board, 2, NewBoard):-
     nl, write('Player 2 turn:'), nl, nl,
     readPlay(Line, Column),
-    (Line =:= 2; Line =:= 3),
+    (Line = 2; Line = 3),
     checkPossibleMove(Line, Column, Board, Boolean),
     Boolean =:= 1,
     takeAllSeedsAt(Line,Column,Board, Board1, Seeds),
     moveLoop(Line, Column, Seeds, Board1 , NewBoard, 0).
 
-movePlayer2(Board, NewBoard):-
+move(Board, 2, NewBoard):-
     clearSreen,
     write('Can\'t play in those coordinates'), nl,
     drawTopBorder,
     drawAll(Board, 0),
-    movePlayer2(Board, NewBoard).
+    move(Board, 2, NewBoard).
     
+/**
+* moveLoop moves diferent houses(moveOneHouse) until the last seed lands on a empty space 
+*/    
 moveLoop(Line, Column, 1, Board, FinalBoard, Iteracao):-
     Iteracao > 0,
     incrementOne(Line, Column, Board, Board1),
@@ -358,19 +376,21 @@ moveLoop(Line, Column, 1, Board, FinalBoard, Iteracao):-
 
 moveLoop(Line, Column, Seeds, Board , X, Iteracao):-
     Iteracao1 is Iteracao + 1,
-    move(Line, Column, Seeds, FinalLine, FinalColumn, Board , NewBoard),
+    moveOneHouse(Line, Column, Seeds, FinalLine, FinalColumn, Board , NewBoard),
     takeAllSeedsAt(FinalLine,FinalColumn, NewBoard, FinalBoard, SeedsAtPos),
     moveLoop(FinalLine, FinalColumn, SeedsAtPos, FinalBoard, X, Iteracao1), !.
 
-
-move(Line, Column, 0, Line, Column, Board , Board).
-move(Line, Column, Seeds, FinalLine, FinalColumn, Board, NewBoard):-
+/**
+* moveOneHouse takes all the seeds of one house and distribute them clockwise
+*/
+moveOneHouse(Line, Column, 0, Line, Column, Board , Board).
+moveOneHouse(Line, Column, Seeds, FinalLine, FinalColumn, Board, NewBoard):-
     Seeds > 0,
     updateCoords(Line,Column,NewLine,NewColumn),
     incrementOne(NewLine,NewColumn,Board, BoardInc),
 
     NewSeeds is Seeds - 1,
-    move(NewLine, NewColumn, NewSeeds, FinalLine, FinalColumn, BoardInc, NewBoard).
+    moveOneHouse(NewLine, NewColumn, NewSeeds, FinalLine, FinalColumn, BoardInc, NewBoard).
         
 %---------------------------------------------------------------------------------
 %Game logic end
@@ -380,23 +400,24 @@ move(Line, Column, Seeds, FinalLine, FinalColumn, Board, NewBoard):-
 %---------------------------------------------------------------------------------
 %Game
 %---------------------------------------------------------------------------------
-init:-k
+init:-
     initialBoard(Tab),
     playerVsPlayer(Tab).
+
 
 playerVsPlayer(Board):-
     clearSreen,
     drawTopBorder,
     drawAll(Board, 0),
     
-    movePlayer1(Board,NewBoard),
+    move(Board, 1, NewBoard),
     checkWinPlayer1(NewBoard),
 
     clearSreen,
     drawTopBorder,
     drawAll(NewBoard, 0),
 
-    movePlayer2(NewBoard, NewBoard2),
+    move(NewBoard, 2, NewBoard2),
     checkWinPlayer2(NewBoard2),
 
     playerVsPlayer(NewBoard2).
@@ -405,11 +426,11 @@ readPlay(Line, Column) :-
     write('Insert the coordinates of the cell you want to play'), nl,
 	write('Line: '),
     read(Line),
-	get_code(_),
+	get_char(_),
 
     write('Column: '),
     read(Column),
-	get_code(_).
+	get_char(_).
 
 clearSreen:-
     nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl.
