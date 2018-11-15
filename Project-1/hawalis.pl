@@ -6,8 +6,8 @@
 initialBoard([
   [2,2,2,2,2,2,2],
   [2,2,2,2,2,2,2],
-  [2,2,2,2,2,2,2],
-  [2,2,2,2,2,2,2]
+  [0,0,0,0,0,0,2],
+  [0,0,0,0,0,0,2]
 ]).
 %---------------------------------------------------------------------------------
 %Inicial board end
@@ -33,8 +33,9 @@ print_cell(9):- put_code(57).
 %---------------------------------------------------------------------------------
 %Board display
 %---------------------------------------------------------------------------------
-drawAll([H | T], Index):-
-    drawBoard([H | T], Index).
+drawCompleteBoard([H | T]):-
+    drawTopBorder,
+    drawBoard([H | T], 0).
 
 drawTopBorder:-
     write('                                 '), nl,
@@ -44,10 +45,8 @@ drawTopBorder:-
 drawBoard([], _).
 drawBoard([H | T], Index) :-
     write('  '), write(Index), write(' |'),
-    drawLine(H), 
-    nl,
-    write('     ---------------------------'), 
-    nl,
+    drawLine(H), nl,
+    write('     ---------------------------'), nl,
     NewIndex is Index+1,
     drawBoard(T, NewIndex).
 
@@ -79,7 +78,25 @@ drawTitle:-
 %---------------------------------------------------------------------------------
 %Matrix functions
 %---------------------------------------------------------------------------------
+/**
+* Creates a Matrix with the given Lines and Columns with element in every position
+*/
+createMatrix(0, Columns, Element, Matrix).
+createMatrix(Lines, Columns, Element, [H|T]):-
+    Lines1 is Lines - 1,
+    createLine(Columns, Element, H),
+    createMatrix(Lines1, Columns, Element, T).
 
+createLine(0, Element, Line).
+createLine(Columns, Element, [H|T]):-
+    Columns1 is Columns - 1,
+    H is Element,
+    createLine(Columns1, Element, T).
+
+
+/**
+* get the element at line and column of the board
+*/
 getMatrixSeedAt(0, Column, [HeaderLines|_], Seed):-
 	getLineSeedAt(Column, HeaderLines, Seed).
 
@@ -95,7 +112,9 @@ getLineSeedAt(Index, [_|TailSeeds], Seed):-
 	NewIndex is Index-1,
 	getLineSeedAt(NewIndex, TailSeeds, Seed).
 
-
+/**
+* set the element at line and column of the board to the newElemnet returning the newBoard
+*/
 setMatrixSeedAtWith(0, Column, NewSeed, [HeaderLines|TailLines], [NewHeaderLines|TailLines]):-
 	setListSeedAtWith(Column, NewSeed, HeaderLines, NewHeaderLines).
 
@@ -111,6 +130,9 @@ setListSeedAtWith(Index, NewSeed, [HeaderSeeds|TailSeeds], [HeaderSeeds|NewTailS
 	NewIndex is Index-1,
 	setListSeedAtWith(NewIndex, NewSeed, TailSeeds, NewTailSeeds).
 
+/**
+* return the the max of a list
+*/
 max_list([H|T], Max) :-
     max_list(T, H, Max).
 
@@ -309,17 +331,15 @@ eatSeedsPlayer2(_, _, Board, Board).
 /**
 *checks if either one of the players has won
 */
-checkWinPlayer1(Board):-
+game_over(Board):-
     checkMostSeedsLine(2, Board, MostSeeds1),
     checkMostSeedsLine(3, Board, MostSeeds2),
     MostSeeds is max(MostSeeds1, MostSeeds2),
     MostSeeds =:= 0,
     write('Player 1 has Won'),
     init.
-
-checkWinPlayer1(_).
     
-checkWinPlayer2(Board):-
+game_over(Board):-
     checkMostSeedsLine(0, Board, MostSeeds1),
     checkMostSeedsLine(1, Board, MostSeeds2),
     MostSeeds is max(MostSeeds1, MostSeeds2),
@@ -327,7 +347,7 @@ checkWinPlayer2(Board):-
     write('Player 2 has Won'),
     init.    
 
-checkWinPlayer2(_).
+game_over(_).
 
 
 /**
@@ -346,8 +366,7 @@ move(Board, 1, NewBoard):-
 move(Board, 1, NewBoard):-
     clearSreen,
     write('Can\'t play in those coordinates'), nl,
-    drawTopBorder,
-    drawAll(Board, 0),
+    drawCompleteBoard(Board),
     move(Board, 1, NewBoard).
 
 move(Board, 2, NewBoard):-
@@ -362,8 +381,7 @@ move(Board, 2, NewBoard):-
 move(Board, 2, NewBoard):-
     clearSreen,
     write('Can\'t play in those coordinates'), nl,
-    drawTopBorder,
-    drawAll(Board, 0),
+    drawCompleteBoard(Board),
     move(Board, 2, NewBoard).
     
 /**
@@ -401,24 +419,22 @@ moveOneHouse(Line, Column, Seeds, FinalLine, FinalColumn, Board, NewBoard):-
 %Game
 %---------------------------------------------------------------------------------
 init:-
-    initialBoard(Tab),
-    playerVsPlayer(Tab).
-
+    %initialBoard(Matrix),
+    createMatrix(4,7,2,Matrix),
+    playerVsPlayer(Matrix).
 
 playerVsPlayer(Board):-
     clearSreen,
-    drawTopBorder,
-    drawAll(Board, 0),
+    drawCompleteBoard(Board),
     
     move(Board, 1, NewBoard),
-    checkWinPlayer1(NewBoard),
+    game_over(NewBoard),
 
     clearSreen,
-    drawTopBorder,
-    drawAll(NewBoard, 0),
+    drawCompleteBoard(NewBoard),
 
     move(NewBoard, 2, NewBoard2),
-    checkWinPlayer2(NewBoard2),
+    game_over(NewBoard2),
 
     playerVsPlayer(NewBoard2).
 
