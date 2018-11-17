@@ -86,7 +86,7 @@ drawTitle:-
     write(' | |              | || |              | || |              | || |              | || |              | || |              | || |              | |'), nl,
     write(' | \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' |'), nl,
     write('  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\' '), nl.
-
+   
 /**
 * draw menu
 */
@@ -137,35 +137,43 @@ doit(2):-
   
 doit(3):- !.
 
+/**
+* draw sub-menu
+*/
 drawSubMenu:-
+    repeat,
     write('.......................'), nl,
     write('     MODO DE JOGO      '), nl,
     write('.......................'), nl,nl,
-    write('1. PLAYER VS PLAYER'), nl, 
-    write('2. PLAYER VS COMPUTER '), nl,
-    write('3. COMPUTER VS COMPUTER '), nl,nl,
-    write('4. BACK '), nl,
+    write('1.1 PLAYER VS PLAYER'), nl, 
+    write('1.2 PLAYER VS COMPUTER '), nl,
+    write('1.3 COMPUTER VS COMPUTER '), nl,nl,
+    write('1.4 BACK '), nl,
+    write('1.5 QUIT '), nl,
     write('.......................'), nl,nl, 
     write('CHOOSE YOUR OPCTION: '), nl,
-    read(OpctionSm), nl, OpctionSm > 0, OpctionSm =< 5,
+    read(OpctionSm), nl, OpctionSm > 0, OpctionSm =< 1.6,
     doit(OpctionSm).
 
-doit(1):-
+doit(1.1):-
     init.
-/*
-doit(2):-
-  .
 
-doit(3):-
-  .
-*/
-doit(4):-
+doit(1.2):-
+  init.
+
+doit(1.3):-
+  init.
+
+doit(1.4):-
     drawMenu.
+
+doit(1.5):- !.
+  
 
 %---------------------------------------------------------------------------------
 %Board display end
 %---------------------------------------------------------------------------------
-
+  
 
 %---------------------------------------------------------------------------------
 %Matrix functions
