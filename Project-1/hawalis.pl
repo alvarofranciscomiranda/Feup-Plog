@@ -87,6 +87,81 @@ drawTitle:-
     write(' | \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' |'), nl,
     write('  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\' '), nl.
 
+/**
+* draw menu
+*/
+drawMenu:-
+    repeat,
+    write('                                                                                                                                                 '), nl,
+    write('.................................................................................................................................................'), nl,
+    write('                                               __    __      ________      ___     _     __     __                                               '), nl,
+    write('                                              |  \\  /  |    |  ______|    |   \\   | |   |  |   |  |                                              '), nl,
+    write('                                              |   \\/   |    | |______     | |\\ \\  | |   |  |   |  |                                              '), nl,
+    write('                                              |   __   |    | |______|    | | \\ \\ | |   |  |   |  |                                              '), nl,
+    write('                                              |  |  |  |    | |______     | |  \\ \\| |   |  |___|  |                                              '), nl,
+    write('                                              |__|  |__|    |________|    |_|   \\___|   |_________|                                              '), nl,nl,
+    write('    /|    __      __        '),nl,
+    write('   / |   |__||   |__| \\ /   '),nl,
+    write('     |:: |   |__ |  |  /  ' ),nl,nl,                       
+    write('  ___     _____       __ _____  __        ___ _____ ___   ___        __  '),nl,
+    write('  ___|      |   |\\ | |__   |   |__| |  | |      |    |   |   | |\\ | |__  '),nl,
+    write(' |___ ::  __|__ | \\|  __|  |   |  \\ |__| |___   |   _|_  |___| | \\|  __|  '),nl,nl,
+    write('  ___     ___        _____  _____      '),nl,
+    write('  ___|   |   | |   |   |      |   '),nl,
+    write('  ___|:: |___\\ |___| __|__    |  '),nl,nl,nl,
+    write('.................................................................................................................................................'), nl,
+
+    write('CHOOSE YOUR OPCTION: '), nl,
+    read(OpctionM), OpctionM > 0, OpctionM =< 4,
+    doit(OpctionM).
+
+doit(1):-
+    drawSubMenu.
+
+doit(2):-
+  clearSreen,
+  write('-----------------------------------------------------------------------INSTRUCTIONS-----------------------------------------------------------------------'), nl,
+  write('1.A player wins a game if he captures all of the opponent s seeds.'), nl,nl,
+  write('2.Players take turns sowing their seeds.'),nl,nl,
+  write('3.A player picks all seeds up from one of the pits on his side that contains 2 or more seeds.'), nl,nl,
+  write('4.Starting from the next pit in counter-clockwise direction, the player drops one of the taken seeds in the following pits all around player s two rows.'),nl,nl,
+  write('5.If the last sown seed  lands in an occupied pit then the player picks all these seeds up (including the one that just landed in the pit) and continues'),nl,
+  write('sowing them in counter-clockwise direction starting from the next pit.'),nl,nl,
+  write('6.If the last sown seed lands in an empty pit  then the turn ends.  If this empty pit is in the inner row and the opposite pit on the opponent s inner row is occupied then all the seeds in the opponent s pit are captured by the player and removed from the board.'),nl,
+  write('In addition, if the opposite pit on the opponent s outer row also contains seeds then all those seeds are captured too and removed from the board.'),nl,nl,
+  write('7.A player is allowed to pick up a seed from a pit containing only a single seed only if no pit on the player s side contains more than one seed. In this'),nl,
+  write('case a player is not allowed to move a single seed to an occupied pit.'),nl,nl,
+  write('8.If a player does not have any seeds on his side then the player loses the game.'),nl,
+  write('-----------------------------------------------------------------------------------------------------------------------------------------------------------'), nl, nl,nl,
+  drawMenu.
+  
+doit(3):- !.
+
+drawSubMenu:-
+    write('.......................'), nl,
+    write('     MODO DE JOGO      '), nl,
+    write('.......................'), nl,nl,
+    write('1. PLAYER VS PLAYER'), nl, 
+    write('2. PLAYER VS COMPUTER '), nl,
+    write('3. COMPUTER VS COMPUTER '), nl,nl,
+    write('4. BACK '), nl,
+    write('.......................'), nl,nl, 
+    write('CHOOSE YOUR OPCTION: '), nl,
+    read(OpctionSm), nl, OpctionSm > 0, OpctionSm =< 5,
+    doit(OpctionSm).
+
+doit(1):-
+    init.
+/*
+doit(2):-
+  .
+
+doit(3):-
+  .
+*/
+doit(4):-
+    drawMenu.
+
 %---------------------------------------------------------------------------------
 %Board display end
 %---------------------------------------------------------------------------------
