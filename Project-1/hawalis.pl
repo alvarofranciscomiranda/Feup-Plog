@@ -48,7 +48,7 @@ drawCompleteBoard([H | T]):-
 drawTopBorder:-
     write('                                 '), nl,
     write('      0   1   2   3   4   5   6  '), nl,
-    write('     --------------------------- '), nl.
+    write('     ___________________________ '), nl.
 
 /**
 * display the indices of the lines starting at Index and after the Board passed as argument
@@ -57,7 +57,7 @@ drawBoard([], _).
 drawBoard([H | T], Index) :-
     write('  '), write(Index), write(' |'),
     drawLine(H), nl,
-    write('     ---------------------------'), nl,
+    write('    |___|___|___|___|___|___|___|'), nl,
     NewIndex is Index+1,
     drawBoard(T, NewIndex).
 
@@ -93,13 +93,13 @@ drawTitle:-
 drawMenu:-
     repeat,
     write('                                                                                                                                                 '), nl,
-    write('.................................................................................................................................................'), nl,
-    write('                                               __    __      ________      ___     _     __     __                                               '), nl,
-    write('                                              |  \\  /  |    |  ______|    |   \\   | |   |  |   |  |                                              '), nl,
-    write('                                              |   \\/   |    | |______     | |\\ \\  | |   |  |   |  |                                              '), nl,
-    write('                                              |   __   |    | |______|    | | \\ \\ | |   |  |   |  |                                              '), nl,
-    write('                                              |  |  |  |    | |______     | |  \\ \\| |   |  |___|  |                                              '), nl,
-    write('                                              |__|  |__|    |________|    |_|   \\___|   |_________|                                              '), nl,nl,
+    write('...........................................................................................................................................................'), nl,
+    write('                                                    __    __      ________      ___     _     __     __                                               '), nl,
+    write('                                                   |  \\  /  |    |  ______|    |   \\   | |   |  |   |  |                                              '), nl,
+    write('                                                   |   \\/   |    | |______     | |\\ \\  | |   |  |   |  |                                              '), nl,
+    write('                                                   |   __   |    | |______|    | | \\ \\ | |   |  |   |  |                                              '), nl,
+    write('                                                   |  |  |  |    | |______     | |  \\ \\| |   |  |___|  |                                              '), nl,
+    write('                                                   |__|  |__|    |________|    |_|   \\___|   |_________|                                              '), nl,nl,
     write('    /|    __      __        '),nl,
     write('   / |   |__||   |__| \\ /   '),nl,
     write('     |:: |   |__ |  |  /  ' ),nl,nl,                       
@@ -109,7 +109,7 @@ drawMenu:-
     write('  ___     ___        _____  _____      '),nl,
     write('  ___|   |   | |   |   |      |   '),nl,
     write('  ___|:: |___\\ |___| __|__    |  '),nl,nl,nl,
-    write('.................................................................................................................................................'), nl,
+    write('...........................................................................................................................................................'), nl,
 
     write('CHOOSE YOUR OPCTION: '), nl,
     read(OpctionM), OpctionM > 0, OpctionM =< 4,
@@ -567,7 +567,7 @@ playerVsPlayer(Board):-
     clearSreen,
     drawCompleteBoard(Board),
     
-    valid_moves(Board, 1, ListOfMoves),
+    valid_moves(Board, 1, ListOfMoves),nl,
     write(ListOfMoves),
     move(Board, 1, NewBoard),
     game_over(NewBoard),
