@@ -47,7 +47,7 @@ drawCompleteBoard([H | T]):-
 drawTopBorder:-
     write('                                 '), nl,
     write('      0   1   2   3   4   5   6  '), nl,
-    write('     --------------------------- '), nl.
+    write('     ___________________________ '), nl.
 
 /**
 * display the indices of the lines starting at Index and after the Board passed as argument
@@ -56,7 +56,7 @@ drawBoard([], _).
 drawBoard([H | T], Index) :-
     write('  '), write(Index), write(' |'),
     drawLine(H), nl,
-    write('     ---------------------------'), nl,
+    write('    |___|___|___|___|___|___|___|'), nl,
     NewIndex is Index+1,
     drawBoard(T, NewIndex).
 
@@ -653,7 +653,7 @@ doit(2):-
   write('case a player is not allowed to move a single seed to an occupied pit.'),nl,nl,
   write('8.If a player does not have any seeds on his side then the player loses the game.'),nl,
   write('-----------------------------------------------------------------------------------------------------------------------------------------------------------'), nl, nl,nl,
-  drawMenu.
+  menu.
   
 doit(3):- !.
 
@@ -668,7 +668,7 @@ doit(1.3):-
     drawPcvsPCMenu.
 
 doit(1.4):-
-    drawMenu.
+    menu.
 
 doit(1.5):- !.
 
