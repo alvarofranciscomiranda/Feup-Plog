@@ -35,6 +35,7 @@ print_cell(9):- put_code(57).
 %Board display
 %---------------------------------------------------------------------------------
 /**
+* drawCompleteBoard(+Board)
 * display the Board passed as argument
 */
 drawCompleteBoard([H | T]):-
@@ -50,6 +51,7 @@ drawTopBorder:-
     write('     ___________________________ '), nl.
 
 /**
+* drawBoard(+Board, +Index)
 * display the indices of the lines starting at Index and after the Board passed as argument
 */
 drawBoard([], _).
@@ -61,6 +63,7 @@ drawBoard([H | T], Index) :-
     drawBoard(T, NewIndex).
 
 /**
+* drawLine(Line)
 * draw the Line passed as argument
 */
 drawLine([]).
@@ -69,22 +72,6 @@ drawLine([H | T]) :-
     print_cell(H), 
     write(' |'), 
     drawLine(T).
-
-/**
-* draw Hawalis title
-*/
-drawTitle:-
-    write('  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. '), nl,
-    write(' | .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |'), nl,
-    write(' | |  ____  ____  | || |      __      | || | _____  _____ | || |      __      | || |   _____      | || |     _____    | || |    _______   | |'), nl,
-    write(' | | |_   ||   _| | || |     /  \\     | || ||_   _||_   _|| || |     /  \\     | || |  |_   _|     | || |    |_   _|   | || |   /  ___  |  | |'), nl,
-    write(' | |   | |__| |   | || |    / /\\ \\    | || |  | | /\\ | |  | || |    / /\\ \\    | || |    | |       | || |      | |     | || |  |  (__ \\_|  | |'), nl,
-    write(' | |   |  __  |   | || |   / ____ \\   | || |  | |/  \\| |  | || |   / ____ \\   | || |    | |   _   | || |      | |     | || |   \'.___`-.   | |'), nl,
-    write(' | |  _| |  | |_  | || | _/ /    \\ \\_ | || |  |   /\\   |  | || | _/ /    \\ \\_ | || |   _| |__/ |  | || |     _| |_    | || |  |`\\____) |  | |'), nl,
-    write(' | | |____||____| | || ||____|  |____|| || |  |__/  \\__|  | || ||____|  |____|| || |  |________|  | || |    |_____|   | || |  |_______.\'  | |'), nl,
-    write(' | |              | || |              | || |              | || |              | || |              | || |              | || |              | |'), nl,
-    write(' | \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' |'), nl,
-    write('  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\' '), nl.
 
 %---------------------------------------------------------------------------------
 %Board display end
@@ -181,7 +168,8 @@ list_sum([Head | Tail], TotalSum) :-
 %Game logic
 %---------------------------------------------------------------------------------
 /**
-*adds one seed at Board[Line,Column]
+* incrementOne(+Line, +Column, +Board, -NewBoard)
+* adds one seed at Board[Line,Column]
 */
 incrementOne(Line, Column, Board, NewBoard):-
     getMatrixSeedAt(Line, Column, Board, Seed),
@@ -189,14 +177,16 @@ incrementOne(Line, Column, Board, NewBoard):-
     setMatrixSeedAtWith(Line, Column, NewSeed, Board, NewBoard).
 
 /**
-*retrives on Seeds all seeds at Board[Line,Column] putting the position at 0 
+* takeAllSeedsAt(+Line, +Column, +Board, NewBoard, -Seeds)
+* retrives on Seeds all seeds at Board[Line,Column] putting the position at 0 
 */
 takeAllSeedsAt(Line, Column, Board, NewBoard, Seeds):-
     getMatrixSeedAt(Line, Column, Board, Seeds),
     setMatrixSeedAtWith(Line, Column, 0, Board, NewBoard).
 
 /**
-*retrives in Most the amount of seeds a player has in a house in his board side
+* checkHigherHouseSeeds(+Board, +Player, -Most)
+* retrives in Most the amount of seeds a player has in a house in his board side
 */
 checkHigherHouseSeeds(Board, 1, Most):-
     checkMostSeedsLine(0, Board, MostSeeds1),
@@ -208,6 +198,9 @@ checkHigherHouseSeeds(Board, 2, Most):-
     checkMostSeedsLine(3, Board, MostSeeds2),
     Most is max(MostSeeds1, MostSeeds2).
 
+/**
+* checkMostSeedsLine(+Line, +Board, -MostSeeds)
+*/
 checkMostSeedsLine(0, [HeaderLines|_], MostSeeds):-
 	max_list(HeaderLines, MostSeeds).
 
@@ -216,7 +209,8 @@ checkMostSeedsLine(Line, [_|TailLines], MostSeeds):-
 	NewLine is Line-1,
 	checkMostSeedsLine(NewLine, TailLines, MostSeeds).
 /**
-*Walk a position in a counter clock way where NewLine and NewColumn are the new coordinates
+* updateCoords(+Line, +Column, -NewLine, -NewColumn)
+* Walk a position in counter clockwise where NewLine and NewColumn are the new coordinates
 */
 updateCoords(Line,Column, NewLine, NewColumn):-
     (Line =:= 0; Line =:= 2),
@@ -226,6 +220,9 @@ updateCoords(Line,Column, NewLine, NewColumn):-
     (Line =:= 1; Line =:= 3),
     updateCoordsBot(Line,Column, NewLine, NewColumn).
 
+/**
+* updateCoordsTop(+Line, +Column, -NewLine, -NewColumn)
+*/
 updateCoordsTop(Line, Column, NewLine, NewColumn):-
     Column =:= 0,
     NewLine is Line + 1,
@@ -235,6 +232,9 @@ updateCoordsTop(Line, Column, NewLine, NewColumn):-
     NewLine is Line,
     NewColumn is Column - 1.
 
+/**
+* updateCoordsBot(+Line, +Column, -NewLine, -NewColumn)
+*/
 updateCoordsBot(Line,Column, NewLine, NewColumn):-
     Column =:= 6,
     NewLine is Line - 1,
@@ -245,17 +245,21 @@ updateCoordsBot(Line,Column, NewLine, NewColumn):-
     NewColumn is Column + 1.
 
 /**
+* checkPossibleMove(+Line, +Column, +Board, -Boolean)
 *Checks if the move where the Board[Line, Column] is played is possible: if yes Boolean is 1; if no Boolean is 0
 */
 checkPossibleMove(Line, Column, Board, Boolean):-
     (Line =:= 0; Line =:= 1),
-    checkMovePossiblePlayer1(Line, Column, Board, Boolean).
+    checkMovePossibleP(Line, Column, 1, Board, Boolean).
 
 checkPossibleMove(Line, Column, Board, Boolean):-
     (Line =:= 2; Line =:= 3),
-    checkMovePossiblePlayer2(Line, Column, Board, Boolean).
+    checkMovePossibleP(Line, Column, 2, Board, Boolean).
 
-checkMovePossiblePlayer1(Line, Column, Board, Boolean):-
+/**
+* checkMovePossibleP(+Line, +Column, +Player, +Board, -Boolean)
+*/
+checkMovePossibleP(Line, Column, 1, Board, Boolean):-
     (Column = 0; Column = 1; Column = 2; Column = 3; Column = 4; Column = 5; Column = 6),
     getMatrixSeedAt(Line, Column, Board, SeedsAt),
     SeedsAt > 0,
@@ -266,16 +270,13 @@ checkMovePossiblePlayer1(Line, Column, Board, Boolean):-
     SeedsAt2 \= 1,
     Boolean is 1.
 
-checkMovePossiblePlayer1(Line, Column, Board, Boolean):-
+checkMovePossibleP(Line, Column, 1, Board, Boolean):-
     (Column = 0; Column = 1; Column = 2; Column = 3; Column = 4; Column = 5; Column = 6),
     getMatrixSeedAt(Line, Column, Board, Seeds),
     Seeds > 1,
     Boolean is 1.
 
-checkMovePossiblePlayer1(_, _, _, Boolean):-
-    Boolean is 0.
-
-checkMovePossiblePlayer2(Line, Column, Board, Boolean):-
+checkMovePossibleP(Line, Column, 2, Board, Boolean):-
     (Column = 0; Column = 1; Column = 2; Column = 3; Column = 4; Column = 5; Column = 6),
     getMatrixSeedAt(Line, Column, Board, SeedsAt),
     SeedsAt > 0,
@@ -286,49 +287,38 @@ checkMovePossiblePlayer2(Line, Column, Board, Boolean):-
     SeedsAt2 \= 1,
     Boolean is 1.
 
-checkMovePossiblePlayer2(Line, Column, Board, Boolean):-
+checkMovePossibleP(Line, Column, 2, Board, Boolean):-
     (Column = 0; Column = 1; Column = 2; Column = 3; Column = 4; Column = 5; Column = 6),
     getMatrixSeedAt(Line, Column, Board, Seeds),
-    Seeds > 0,
+    Seeds > 1,
     Boolean is 1.
 
-checkMovePossiblePlayer2(_, _, _, Boolean):-
+checkMovePossibleP(_, _, _, _, Boolean):-
     Boolean is 0.
+
 
 /**
-*checks if when a turn ends the player will eat seeds: if yes Boolean is 1; if no Boolean is 0
+* canEat(+Line, +Column, +Player, +Board, -Boolean)
+* checks if when a turn ends the player will eat seeds: if yes Boolean is 1; if no Boolean is 0
 */
-canEat(Line, Column, Board, Boolean):-
-    Line =:= 1,
-    canEatPlayer1(Line, Column, Board, Boolean).
-
-canEat(Line, Column, Board, Boolean):-
-    Line =:= 2,
-    canEatPlayer2(Line, Column, Board, Boolean).
-
-canEat(_, _, _, Boolean):-
-    Boolean is 0.
-
-canEatPlayer1(Line, Column, Board, Boolean):-
+canEat(Line, Column, 1, Board, Boolean):-
     LineToEat is Line + 1,
     getMatrixSeedAt(LineToEat, Column, Board, Seed),
     Seed > 0,
     Boolean is 1.
 
-canEatPlayer1(_, _, _, Boolean):-
-    Boolean is 0.
-
-canEatPlayer2(Line, Column, Board, Boolean):-
+canEat(Line, Column, 2, Board, Boolean):-
     LineToEat is Line - 1,
     getMatrixSeedAt(LineToEat, Column, Board, Seed),
     Seed > 0,
     Boolean is 1.
 
-canEatPlayer2(_, _, _, Boolean):-
+canEat(_, _, _, _, Boolean):-
     Boolean is 0.
 
 /**
-*eats seeds from the other player
+* eatSeeds(+Line, +Column, +Board, -NewBoard)
+* eats seeds from the other player
 */
 eatSeeds(Line, Column, Board, NewBoard):-
     Line =:= 1,
@@ -342,8 +332,12 @@ eatSeeds(Line, _, Board, Board):-
     (Line =:= 0; Line =:= 3),
     !.
 
+/**
+* eatSeedsPlayer1(+Line, +Column, +Board, -NewBoard)
+* checks if can eat and if it can then eats the seeds of the opposite player
+*/
 eatSeedsPlayer1(Line, Column, Board, NewBoard):-
-    canEatPlayer1(Line, Column, Board, Boolean),
+    canEat(Line, Column, 1, Board, Boolean),
     Boolean =:= 1,
     Line1 is Line + 1,
     Line2 is Line + 2,
@@ -352,8 +346,12 @@ eatSeedsPlayer1(Line, Column, Board, NewBoard):-
 
 eatSeedsPlayer1(_, _, Board, Board).
 
+/**
+* eatSeedsPlayer2(+Line, +Column, +Board, -NewBoard)
+* checks if can eat and if it can then eats the seeds of the opposite player
+*/
 eatSeedsPlayer2(Line, Column, Board, NewBoard):-
-    canEatPlayer2(Line, Column, Board, Boolean),
+    canEat(Line, Column, 2, Board, Boolean),
     Boolean =:= 1,
     Line1 is Line - 1,
     Line2 is Line - 2,
@@ -363,6 +361,7 @@ eatSeedsPlayer2(Line, Column, Board, NewBoard):-
 eatSeedsPlayer2(_, _, Board, Board).
 
 /**
+* game_over(+Board, +Player)
 *checks if either one of the players has won
 */
 game_over(Board, 1):-
@@ -371,6 +370,7 @@ game_over(Board, 1):-
     write('Player 1 has Won'), nl,
     write('Press any key to go to Menu'),
     pressLetter,
+    clearSreen,
     menu.
     
 game_over(Board, 2):-
@@ -379,13 +379,15 @@ game_over(Board, 2):-
     write('Player 2 has Won'), nl,
     write('Press any key to go to Menu'),
     pressLetter,
+    clearSreen,
     menu.    
 
 game_over(_, _).
 
 
 /**
-* MovePlayerX first reads the line and column the player want to play, then checks 
+* move(+Board, +Player, -NewBoard)
+* Move first reads the line and column the player want to play, then checks 
 * if the play is possible and only then calls the moveLoop function to do a move
 */
 move(Board, 1, NewBoard):-
@@ -425,7 +427,8 @@ move(Board, 2, NewBoard):-
     move(Board, 2, NewBoard).
 
 /**
-* move for Pc
+* move(+Line, +Column, +Board, +Player, -NewBoard)
+* move function for Pc(without reading input)
 */
 move(Line, Column, Board, 1, NewBoard):-
     takeAllSeedsAt(Line, Column, Board, Board1, Seeds),
@@ -436,6 +439,7 @@ move(Line, Column, Board, 2, NewBoard):-
     moveLoop(Line, Column, Seeds, Board1 , NewBoard, 0).
     
 /**
+* moveLoop(+Line, +Column, +Seeds, +Board, -FinalBoard, +Iteracao)
 * moveLoop moves diferent houses(moveOneHouse) until the last seed lands on a empty space 
 */    
 moveLoop(Line, Column, 1, Board, FinalBoard, Iteracao):-
@@ -450,6 +454,7 @@ moveLoop(Line, Column, Seeds, Board , X, Iteracao):-
     moveLoop(FinalLine, FinalColumn, SeedsAtPos, FinalBoard, X, Iteracao1), !.
 
 /**
+* moveOneHouse(+Line, +Column, +Seeds, -FinalLine, -FinalColumn, +Board, -NewBoard)
 * moveOneHouse takes all the seeds of one house and distribute them anti-clockwise
 */
 moveOneHouse(Line, Column, 0, Line, Column, Board , Board).
@@ -462,6 +467,7 @@ moveOneHouse(Line, Column, Seeds, FinalLine, FinalColumn, Board, NewBoard):-
     moveOneHouse(NewLine, NewColumn, NewSeeds, FinalLine, FinalColumn, BoardInc, NewBoard).
 
 /**
+* valid_moves(+Board, +Player, -ListOfMoves)
 * valid_moves return a list of possible moves like this [Line, Column] for the player 
 * given by the second argument in the Board passed as first argument 
 */
@@ -476,9 +482,10 @@ valid_moves(Board, 2, ListOfMoves):-
     append(ListOfMoves1, ListOfMoves2, ListOfMoves).  
 
 /**
-* list all possible moves in the lines given by the first argument and the columns 
+* valid_moves_listing(+Line, +Column, +Board, -ListOfMoves, +HelperList)
+* list all possible moves in Line given by the first argument and the columns 
 * between the second argument and 7(the number of columns is 6) of the board passed  
-* as thir argument returning the list ListOfMoves
+* as third argument returning the list ListOfMoves; HelperList is a helper of the function
 */  
 valid_moves_listing(_, 7, _, HelperList, HelperList).
 valid_moves_listing(Line, Column, Board, ListOfMoves, HelperList):-
@@ -494,9 +501,10 @@ valid_moves_listing(Line, Column, Board, ListOfMoves, HelperList):-
     valid_moves_listing(Line, Column1, Board, ListOfMoves, HelperList).
 
 /**
+* value(+Board, +Player, -Value)
 * returns in value the total seeds he has already eaten from his opponent 
 * (28 initial seeds - those he stll has), the higher the value the better
-* are the chances of winning; if  
+* are the chances of winning  
 */
 value(Board, 1, Value):-
     getSumOfLine(2, Board, Sum1),
@@ -508,9 +516,9 @@ value(Board, 2, Value):-
     getSumOfLine(1, Board, Sum2),
     Value is 28 - (Sum1 + Sum2).    
 
-
 /**
 * choose_move(+Board, +Dificulty, +Player, -Move)
+* retrive one Move that can be a random one or the best one
 */
 choose_move(Board, 1, Player, Move):-
     valid_moves(Board, Player, ListOfMoves),
@@ -528,6 +536,11 @@ choose_move(Board, 2, Player, Move):-
     
 choose_best_moves(_, _, [], MovesAnnex, ValueAnnex, MovesAnnex, ValueAnnex).
 
+/**
+* choose_best_moves(+Board, +Player, +PossibleMoves, +MovesAnnex, +ValueAnnex, -BestMoves, -BestValue)
+* puts in Best Moves the best plays from PossibleMoves that the Player can do in Board
+* MovesAnnex and ValueAnnex are helpers of the function
+*/
 choose_best_moves(Board, Player, [H|T], _, ValueAnnex, BestMoves, BestValue):- 
     nth0(0, H, Li),
     nth0(1, H, Col),
@@ -536,7 +549,6 @@ choose_best_moves(Board, Player, [H|T], _, ValueAnnex, BestMoves, BestValue):-
     Value > ValueAnnex,
     append([H], [], NewBestMoves),
     choose_best_moves(Board, Player, T, NewBestMoves, Value, BestMoves, BestValue).
-
 
 choose_best_moves(Board, Player, [H|T], MovesAnnex, ValueAnnex, BestMoves, BestValue):-
     
@@ -561,10 +573,21 @@ choose_best_moves(Board, Player, [_|T], MovesAnnex, ValueAnnex, BestMoves, BestV
 %Game
 %---------------------------------------------------------------------------------
 /**
-* draw menu
+* menu draw the main menu of the game
 */
 menu:-
     repeat,
+    write('  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. '), nl,
+    write(' | .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |'), nl,
+    write(' | |  ____  ____  | || |      __      | || | _____  _____ | || |      __      | || |   _____      | || |     _____    | || |    _______   | |'), nl,
+    write(' | | |_   ||   _| | || |     /  \\     | || ||_   _||_   _|| || |     /  \\     | || |  |_   _|     | || |    |_   _|   | || |   /  ___  |  | |'), nl,
+    write(' | |   | |__| |   | || |    / /\\ \\    | || |  | | /\\ | |  | || |    / /\\ \\    | || |    | |       | || |      | |     | || |  |  (__ \\_|  | |'), nl,
+    write(' | |   |  __  |   | || |   / ____ \\   | || |  | |/  \\| |  | || |   / ____ \\   | || |    | |   _   | || |      | |     | || |   \'.___`-.   | |'), nl,
+    write(' | |  _| |  | |_  | || | _/ /    \\ \\_ | || |  |   /\\   |  | || | _/ /    \\ \\_ | || |   _| |__/ |  | || |     _| |_    | || |  |`\\____) |  | |'), nl,
+    write(' | | |____||____| | || ||____|  |____|| || |  |__/  \\__|  | || ||____|  |____|| || |  |________|  | || |    |_____|   | || |  |_______.\'  | |'), nl,
+    write(' | |              | || |              | || |              | || |              | || |              | || |              | || |              | |'), nl,
+    write(' | \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' || \'--------------\' |'), nl,
+    write('  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\'  \'----------------\' '), nl,
     write('                                                                                                                                                 '), nl,
     write('...........................................................................................................................................................'), nl,
     write('                                                    __    __      ________      ___     _     __     __                                               '), nl,
@@ -574,7 +597,7 @@ menu:-
     write('                                                   |  |  |  |    | |______     | |  \\ \\| |   |  |___|  |                                              '), nl,
     write('                                                   |__|  |__|    |________|    |_|   \\___|   |_________|                                              '), nl,nl,
     write('    /|    __      __        '),nl,
-    write('   / |   |__||   |__| \\ /   '),nl,
+    write('     |   |__||   |__| \\ /   '),nl,
     write('     |:: |   |__ |  |  /  ' ),nl,nl,                       
     write('  ___     _____       __ _____  __        ___ _____ ___   ___        __  '),nl,
     write('  ___|      |   |\\ | |__   |   |__| |  | |      |    |   |   | |\\ | |__  '),nl,
@@ -589,7 +612,7 @@ menu:-
     doit(OpctionM).
 
 /**
-* draw sub-menu
+* drawSubMenu with the diferent modes to play
 */
 drawSubMenu:-
     repeat,
@@ -606,6 +629,9 @@ drawSubMenu:-
     read(OpctionSm), nl, OpctionSm > 0, OpctionSm =< 1.6,
     doit(OpctionSm).
 
+/**
+* drawPvsPCMenu with the options of a Human player vs Pc game 
+*/
 drawPvsPCMenu:-
     repeat,
     write('.......................'), nl,
@@ -613,13 +639,16 @@ drawPvsPCMenu:-
     write('.......................'), nl,nl,
     write('2.1 Easy'), nl, 
     write('2.2 Hard '), nl,nl,
-    write('2.3 BACK '), nl,
-    write('2.4 QUIT '), nl,
+    write('2.3 Back '), nl,
+    write('2.4 Quit '), nl,
     write('.......................'), nl,nl, 
     write('CHOOSE YOUR OPCTION: '), nl,
     read(OpctionS1m), nl, OpctionS1m > 2, OpctionS1m =< 2.5,
     doit(OpctionS1m).
 
+/**
+* drawPcvsPCMenu with the options of a Pc vs Pc game 
+*/
 drawPcvsPCMenu:-
     repeat,
     write('.......................'), nl,
@@ -628,35 +657,44 @@ drawPcvsPCMenu:-
     write('3.1 Easy vs Easy'), nl, 
     write('3.2 Easy vs Hard '), nl,
     write('3.3 Hard vs Hard '), nl, nl,
-    write('3.4 BACK '), nl,
-    write('3.5 QUIT '), nl,
+    write('3.4 Back '), nl,
+    write('3.5 Quit '), nl,
     write('.......................'), nl,nl, 
     write('CHOOSE YOUR OPCTION: '), nl,
     read(OpctionS2m), nl, OpctionS2m > 3, OpctionS2m =< 3.6,
     doit(OpctionS2m).
 
+/**
+* doit(+Option) gets the option selected in the menu
+*/
 doit(1):-
     drawSubMenu.
 
 doit(2):-
   clearSreen,
   write('-----------------------------------------------------------------------INSTRUCTIONS-----------------------------------------------------------------------'), nl,
-  write('1.A player wins a game if he captures all of the opponent s seeds.'), nl,nl,
-  write('2.Players take turns sowing their seeds.'),nl,nl,
-  write('3.A player picks all seeds up from one of the pits on his side that contains 2 or more seeds.'), nl,nl,
-  write('4.Starting from the next pit in counter-clockwise direction, the player drops one of the taken seeds in the following pits all around player s two rows.'),nl,nl,
-  write('5.If the last sown seed  lands in an occupied pit then the player picks all these seeds up (including the one that just landed in the pit) and continues'),nl,
-  write('sowing them in counter-clockwise direction starting from the next pit.'),nl,nl,
-  write('6.If the last sown seed lands in an empty pit  then the turn ends.  If this empty pit is in the inner row and the opposite pit on the opponent s inner row is occupied then all the seeds in the opponent s pit are captured by the player and removed from the board.'),nl,
-  write('In addition, if the opposite pit on the opponent s outer row also contains seeds then all those seeds are captured too and removed from the board.'),nl,nl,
-  write('7.A player is allowed to pick up a seed from a pit containing only a single seed only if no pit on the player s side contains more than one seed. In this'),nl,
-  write('case a player is not allowed to move a single seed to an occupied pit.'),nl,nl,
-  write('8.If a player does not have any seeds on his side then the player loses the game.'),nl,
+  write('1.The board consists in 4 rows of 7 columns each one with 2 seeds in the begining.'), nl, nl,
+  write('2.The first and second rows are from Player1, The third and fourth are from Player2.'), nl, nl,
+  write('3.A Player can only play on his side.'), nl, nl,
+  write('4.To make move a player has to choose  one of his houses, then picks all of that houses seeds and distribute them'),nl,nl,
+  write('5.He distributes them in a anti-clockwise way, putting one in the next house and then proceding to the next one'),nl,nl,
+  write('6.If the last one does\'t lands on a empty house the player must pick those seeds and must distribute them in the same way as before'),nl,nl,
+  write('7.When the last one lands on a empty house there must be checked if can be eaten seeds from the other player'),nl,nl,
+  write('8.To eat one seed a Player\'s turn must end in the inner row.'),nl,nl,
+  write('9.If the opposite house of the inner row has seeds those will be eaten along with the ones on the opposite house of the outter row.'),nl,nl,
+  write('10.If the opposite house of the inner row has no seeds there is no seeds eaten.'),nl,nl,
+  write('11.The objective of the game is to eat all of the opponent\'s seeds.'), nl,nl,
+  write('12.When choosing a house to move there are some rules to follow.'), nl,nl,
+  write('13.When there is a house with more than one seed the player can\t play houses with only one seed.'), nl,nl,
+  write('14.When there is only houses with one seed those can be played if those seed will not go to a occupied house.'), nl,nl,
   write('-----------------------------------------------------------------------------------------------------------------------------------------------------------'), nl, nl,nl,
+  write('Press any key to return to menu'),
+  pressLetter,nl,
+  pressLetter,
+  clearSreen,
   menu.
   
 doit(3):- !.
-
 
 doit(1.1):-
     init(1).
@@ -700,7 +738,6 @@ doit(3.4):-
 doit(3.5):- !.
 
 
-
 /**
 * playervsPlayer(+Board) creates a hawalis game between a Human and another Human
 */
@@ -720,7 +757,7 @@ playerVsPlayer(Board):-
     playerVsPlayer(NewBoard2).
 
 /**
-* playervsPc(+Board, +Dificulty) creates a hawalis game between a Human and a Pc with difficulty 2
+* playervsPc(+Board, +Dificulty) creates a hawalis game between a Human and a Pc with given difficulty 
 */
 playerVsPc(Board, Dificulty):-
     clearSreen,
@@ -732,7 +769,7 @@ playerVsPc(Board, Dificulty):-
     clearSreen,
     drawCompleteBoard(NewBoard),
 
-    write('Press any key to let Pc play'),
+    write('Press any key to let Pc play'), nl,
     pressLetter,
 
     choose_move(NewBoard, Dificulty, 2, [Li|[Col|_]]),
@@ -742,13 +779,14 @@ playerVsPc(Board, Dificulty):-
     playerVsPc(NewBoard2, Dificulty).
 
 /**
-* playervsPc(+Board, +Dificulty) creates a hawalis game between a Human and a Pc 
+* pcVsPc(+Board, +Dificulty1, +Dificulty2) creates a hawalis game between two Pc's each one with
+* a given dificulty
 */
 pcVsPc(Board, Dificulty1, Dificulty2):-
     clearSreen,
     drawCompleteBoard(Board),
 
-    write('Press any key to let Pc-Player1 play'),
+    write('Press any key to let Pc-Player1 play'), nl,
     pressLetter,
     
     choose_move(Board, Dificulty1, 1, [Li|[Col|_]]),
@@ -758,7 +796,7 @@ pcVsPc(Board, Dificulty1, Dificulty2):-
     clearSreen,
     drawCompleteBoard(NewBoard),
     
-    write('Press any key to let Pc-Player 2 play'),
+    write('Press any key to let Pc-Player 2 play'),nl,
     pressLetter,
 
     choose_move(NewBoard, Dificulty2, 2, [Li2|[Col2|_]]),
@@ -796,6 +834,7 @@ pressLetter:-
 * clearSreen writes many new lines to clear the sreen
 */
 clearSreen:-
+    nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,
     nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl.
 
 init(1):-
@@ -823,11 +862,9 @@ init(6):-
     pcVsPc(Matrix, 2, 2).
 
 
-hawalis:-
+play:-
     clearSreen,
-    drawTitle,
     menu.
-
 %---------------------------------------------------------------------------------
 %Game end
 %---------------------------------------------------------------------------------
